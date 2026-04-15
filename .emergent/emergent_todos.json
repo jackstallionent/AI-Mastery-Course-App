@@ -8,27 +8,19 @@
     "status": "completed"
   },
   {
-    "content": "Phase 3: Google OAuth - Backend auth endpoints (test-login, /auth/me, JWT)",
+    "content": "Phase 3: Google OAuth + MongoDB persistence + testing",
     "status": "completed"
   },
   {
-    "content": "Phase 3: Google OAuth - Frontend Google Sign-In + auth context",
+    "content": "Phase 4: Polish - Mobile responsive check",
     "status": "completed"
   },
   {
-    "content": "Phase 3: MongoDB user persistence - progress, scores, completed exercises",
+    "content": "Phase 4: Polish - Verify all exercise pages render correctly",
     "status": "completed"
   },
   {
-    "content": "Phase 3: Test bypass for testing (email/password)",
+    "content": "Phase 4: Final testing",
     "status": "completed"
-  },
-  {
-    "content": "Phase 3: End to End Testing using Testing Agent",
-    "status": "in_progress"
-  },
-  {
-    "content": "Phase 4: Polish, hardening, content completeness",
-    "status": "pending"
   }
 ]

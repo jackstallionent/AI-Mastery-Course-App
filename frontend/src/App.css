@@ -1,34 +1,263 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* JSE AI Mastery - Custom Styles */
+
+/* Section Header */
+.section-header {
+  margin-bottom: 2rem;
+}
+.section-header .eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: var(--jse-muted);
+  margin-bottom: 0.5rem;
+}
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--jse-text);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Exercise Card */
+.exercise-card {
+  background: var(--jse-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.exercise-card:hover {
+  border-color: rgba(155, 123, 46, 0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 18px 50px rgba(0,0,0,0.55);
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Paywall Overlay */
+.paywall-overlay {
+  background: rgba(10, 12, 15, 0.35);
+  backdrop-filter: blur(2px);
 }
 
-.App-link {
-    color: #61dafb;
+/* Interactive Input */
+.jse-input {
+  background: var(--jse-bg-alt);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: var(--jse-text);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.jse-input:focus {
+  border-color: var(--jse-teal);
+  box-shadow: 0 0 0 3px rgba(0, 180, 196, 0.22);
+}
+.jse-input::placeholder {
+  color: var(--jse-muted);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* JSE Textarea */
+.jse-textarea {
+  background: var(--jse-bg-alt);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: var(--jse-text);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.jse-textarea:focus {
+  border-color: var(--jse-teal);
+  box-shadow: 0 0 0 3px rgba(0, 180, 196, 0.22);
+}
+
+/* Button styles */
+.jse-btn-teal {
+  background: var(--jse-teal);
+  color: var(--jse-bg);
+  border: none;
+  border-radius: 12px;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.jse-btn-teal:hover {
+  background: var(--jse-teal-dark);
+}
+.jse-btn-teal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.jse-btn-gold {
+  background: var(--jse-gold);
+  color: var(--jse-bg);
+  border: none;
+  border-radius: 12px;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.jse-btn-gold:hover {
+  background: var(--jse-gold-light);
+}
+
+.jse-btn-secondary {
+  background: transparent;
+  color: var(--jse-text);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.jse-btn-secondary:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.16);
+}
+
+/* Progress bar */
+.jse-progress {
+  height: 6px;
+  background: var(--jse-bg-alt);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.jse-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease-out;
+}
+
+/* Score display */
+.jse-score {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Flip card */
+.flip-card {
+  perspective: 800px;
+  cursor: pointer;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 14px;
+}
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed var(--jse-teal-deep);
+  border-radius: 16px;
+  background: rgba(0, 79, 92, 0.1);
+  padding: 1rem;
+  min-height: 60px;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.drop-zone.active {
+  border-color: var(--jse-teal);
+  box-shadow: 0 0 0 3px rgba(0, 180, 196, 0.14);
+  background: rgba(0, 79, 92, 0.18);
+}
+
+/* Kanban */
+.kanban-column {
+  background: var(--jse-bg-alt);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.05);
+  min-height: 300px;
+}
+.kanban-card {
+  background: var(--jse-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.75rem;
+  cursor: grab;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.kanban-card:hover {
+  border-color: var(--jse-teal);
+}
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+/* Timer */
+.timer-display {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+/* Cascade layer */
+.cascade-layer {
+  border-left: 3px solid var(--jse-teal);
+  padding-left: 1rem;
+  margin-left: 0.5rem;
+  transition: border-color 0.3s;
+}
+.cascade-layer.active {
+  border-color: var(--jse-gold);
+}
+
+/* Copy button feedback */
+.copy-feedback {
+  position: relative;
+}
+.copy-feedback::after {
+  content: 'Copied!';
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--jse-teal);
+  color: var(--jse-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.copy-feedback.show::after {
+  opacity: 1;
 }

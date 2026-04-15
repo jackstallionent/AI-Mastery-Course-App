@@ -1,0 +1,47 @@
+export const GLOSSARY_BASIC = [
+  { term: 'Artificial Intelligence', def: 'Technology enabling computers to perform tasks requiring human-like reasoning, learning, and perception. The engine. You are the driver.', category: 'core' },
+  { term: 'Machine Learning', def: 'Systems that learn patterns from data without being explicitly programmed. The foundation beneath all modern AI.', category: 'core' },
+  { term: 'Large Language Model', def: 'AI trained on enormous text datasets to understand and generate human language. The technology behind ChatGPT, Claude, and Gemini.', category: 'core' },
+  { term: 'Generative AI', def: 'AI that creates new content — text, images, music, code — rather than just analyzing existing data. 72% of organizations now use it.', category: 'core' },
+  { term: 'Prompt', def: 'The instruction you give to an AI. The quality of your prompt directly determines the quality of your output.', category: 'interaction' },
+  { term: 'Prompt Engineering', def: 'The skill of writing effective AI instructions using frameworks like RACE, Bento Box, and Chain-of-Thought.', category: 'interaction' },
+  { term: 'Constraint Satisfaction', def: 'The principle that giving AI more structure produces dramatically better output. More constraints = more precision.', category: 'interaction' },
+  { term: 'Hallucination', def: 'When AI generates confident but factually incorrect information. Not a bug — a feature of prediction-based systems.', category: 'quality' },
+  { term: 'Grounding', def: 'Connecting AI to verified external information so it answers from facts, not from memory alone. Grounded AI cites sources.', category: 'quality' },
+  { term: 'Context Window', def: 'How much information an AI can process at once — like a whiteboard that gets erased when full. Ranges from 4K to 2M+ tokens in 2026.', category: 'technical' },
+  { term: 'Token', def: 'The basic unit AI uses to process text. Roughly 4 characters or three-quarters of a word.', category: 'technical' },
+  { term: 'Algorithmic Bias', def: 'When AI produces unfair results because its training data contained human biases. The fix is better data and better auditing.', category: 'ethics' },
+  { term: 'Deepfake', def: 'AI-generated synthetic media designed to impersonate a real person. 8 million deepfake files existed by end of 2025.', category: 'ethics' },
+  { term: 'Chatbot', def: 'AI designed for text-based conversation. ChatGPT, Claude, Gemini. The steering wheel, not the engine.', category: 'tools' },
+  { term: 'Training Data', def: 'The information an AI learns from. Like textbooks — shapes everything the AI knows and the biases it inherits.', category: 'technical' },
+];
+
+export const GLOSSARY_FULL = [
+  ...GLOSSARY_BASIC,
+  { term: 'Agentic AI', def: 'AI that independently plans and executes multi-step tasks. The defining AI trend of 2026. If your AI takes initiative, it is an agent.', category: 'advanced' },
+  { term: 'Context Engineering', def: 'The 2026 evolution of prompt engineering. Designing the entire environment — system prompts, knowledge bases, behavioral rules, memory.', category: 'advanced' },
+  { term: 'System Prompt', def: 'Persistent instructions defining an AI\'s identity, behavior, and constraints. The foundation of context engineering.', category: 'advanced' },
+  { term: 'Negative Constraints', def: 'Instructions telling AI what NOT to do. Often more powerful than positive instructions. The most underused superpower in prompting.', category: 'advanced' },
+  { term: 'RAG', def: 'Retrieval-Augmented Generation. AI searches verified documents before answering. Reduces hallucination by 40-71%.', category: 'advanced' },
+  { term: 'Bicameral AI', def: 'An architecture with two hemispheres: one for creative generation, one for rigorous verification. The ORSON Architecture is bicameral.', category: 'advanced' },
+  { term: 'Multimodal AI', def: 'AI that works with text, images, audio, and video simultaneously. Most frontier models in 2026 are multimodal.', category: 'advanced' },
+  { term: 'Voice Cloning', def: 'AI that replicates a person\'s voice from just 3 seconds of audio. Now indistinguishable from real voices.', category: 'advanced' },
+  { term: 'Shadow AI', def: 'Employees using unauthorized AI tools with company data. 68% of workers do it. The single biggest enterprise AI compliance risk in 2026.', category: 'enterprise' },
+  { term: 'Sovereign AI', def: 'AI deployed on controlled infrastructure, ensuring data privacy and ownership. The competitive moat for enterprises.', category: 'enterprise' },
+  { term: 'Model Collapse', def: 'When AI trained on AI-generated data progressively degrades. Why synthetic data requires verification.', category: 'advanced' },
+  { term: 'Transformer', def: 'The neural network architecture powering modern AI chatbots. Invented by Google in 2017. Still the foundation in 2026.', category: 'technical' },
+  { term: 'Fine-Tuning', def: 'Specializing a general AI model for a specific task by training it on focused examples.', category: 'technical' },
+  { term: 'Workflow Automation', def: 'Using AI to automatically perform repetitive tasks in sequence. The path from manual AI use to systematic AI leverage.', category: 'tools' },
+  { term: 'Neural Network', def: 'A computing system inspired by the brain, made of interconnected processing nodes that learn patterns.', category: 'core' },
+];
+
+export const GLOSSARY_CATEGORIES = {
+  core: 'Core Concepts',
+  interaction: 'AI Interaction',
+  quality: 'Quality & Safety',
+  technical: 'Technical',
+  ethics: 'Ethics & Safety',
+  tools: 'Tools & Platforms',
+  advanced: 'Advanced (2026)',
+  enterprise: 'Enterprise',
+};

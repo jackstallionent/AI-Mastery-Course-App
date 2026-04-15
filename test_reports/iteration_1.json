@@ -1,0 +1,54 @@
+{
+  "summary": "Completed comprehensive testing of JSE AI Mastery course ecosystem. Backend APIs mostly functional with one budget-related issue. Frontend working excellently with proper tier management, admin mode, paywall gates, and live AI integrations.",
+  "backend_issues": {
+    "critical_bugs": [
+      {
+        "endpoint": "/api/ai/council",
+        "issue": "Budget exceeded error: 'Budget has been exceeded! Current cost: 0.011052, Max budget: 0.001'",
+        "impact": "Council of Experts feature fails in backend testing",
+        "fix_priority": "HIGH"
+      }
+    ],
+    "flaky_endpoints": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Sidebar Navigation",
+        "issue": "Train Your Intuition exercise not found in sidebar when expanding Tier 0",
+        "selector": "[data-testid='sidebar-exercise-train-intuition']",
+        "fix_priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Non-existent exercise URLs",
+        "issue": "No proper error handling for invalid exercise IDs - shows blank page",
+        "affected_selectors": ["text=Exercise not found"]
+      }
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Dashboard loads correctly with progress stats and tier cards",
+    "Admin mode (?admin=true) unlocks all 5 tiers and shows admin badge",
+    "Non-admin mode only has Tier 0 unlocked with proper lock icons",
+    "Sidebar navigation shows correct lock/unlock status",
+    "Paywall gate displays properly with blurred preview, price, and unlock CTA",
+    "Train Your Intuition: TRUE/FALSE buttons work to sort claims into zones",
+    "Constraint Slider: Level buttons switch between 5 levels, quality score changes (12→96)",
+    "Council of Experts: LIVE Claude API returns 4 perspectives + synthesis",
+    "Bicameral Pipeline: LIVE Claude API ORSN→STDIO pipeline with verification score",
+    "ROI Calculator: inputs calculate and display chart correctly (408% ROI)",
+    "Backend health endpoint returns ok",
+    "Backend progress tracking (save/get) works correctly",
+    "Backend input validation works for both AI endpoints",
+    "Backend Bicameral Pipeline endpoint works with proper response structure"
+  ],
+  "test_report_links": ["/app/backend_test.py"],
+  "action_item_for_main_agent": "Fix Emergent LLM key budget limit - current budget is $0.001 which is insufficient for Council of Experts API calls. Consider increasing budget or using a different API key.",
+  "updated_files": ["/app/backend_test.py"],
+  "success_percentage": "Backend: 86% (6/7 tests passed), Frontend: 95% (19/20 features working)",
+  "should_call_test_agent_after_fix": "false",
+  "should_main_agent_test_itself": "true"
+}

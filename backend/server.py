@@ -1,89 +1,208 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional
 import os
-import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
-from datetime import datetime, timezone
+import json
+import re
+import time
+import asyncio
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
+load_dotenv()
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+app = FastAPI(title="JSE AI Mastery API")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
-
+# CORS
+origins = os.getenv("CORS_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# MongoDB
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DB_NAME", "test_database")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+# LLM Config
+API_KEY = os.getenv("EMERGENT_LLM_KEY")
+MODEL_PROVIDER = "anthropic"
+MODEL_NAME = "claude-4-sonnet-20250514"
+
+# Rate limiting
+request_times = {}
+RATE_LIMIT_WINDOW = 60
+RATE_LIMIT_MAX = 10
+
+def check_rate_limit(ip: str):
+    now = time.time()
+    if ip not in request_times:
+        request_times[ip] = []
+    request_times[ip] = [t for t in request_times[ip] if now - t < RATE_LIMIT_WINDOW]
+    if len(request_times[ip]) >= RATE_LIMIT_MAX:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded. Please wait a moment.")
+    request_times[ip].append(now)
+
+def parse_json_response(response_text: str) -> dict:
+    """Parse JSON from LLM response, handling markdown fences."""
+    try:
+        return json.loads(response_text)
+    except json.JSONDecodeError:
+        json_match = re.search(r'\{[\s\S]*\}', str(response_text))
+        if json_match:
+            return json.loads(json_match.group())
+        raise ValueError("Could not parse JSON from response")
+
+# ─── Models ─────────────────────────────────────────────────────────
+
+class CouncilRequest(BaseModel):
+    question: str
+
+class BicameralRequest(BaseModel):
+    draft: str
+    context: Optional[str] = "professional AI education content"
+
+class ProgressUpdate(BaseModel):
+    exercise_id: str
+    score: Optional[int] = None
+    completed: bool = False
+    data: Optional[dict] = None
+
+# ─── Health ──────────────────────────────────────────────────────────
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok", "service": "JSE AI Mastery API"}
+
+# ─── Council of Experts ──────────────────────────────────────────────
+
+@app.post("/api/ai/council")
+async def council_of_experts(req: CouncilRequest, request: Request):
+    check_rate_limit(request.client.host)
+    if not req.question or len(req.question.strip()) < 5:
+        raise HTTPException(status_code=400, detail="Question must be at least 5 characters")
+    
+    system_message = """You are the Council of Experts engine for Jack Stallion Enterprise's AI Mastery course.
+
+When given a question or decision, you MUST respond with ONLY valid JSON (no markdown, no code fences, no extra text).
+
+The JSON must follow this exact structure:
+{
+  "optimist": {
+    "title": "The Optimist",
+    "icon": "sun",
+    "perspective": "2-3 sentence best-case analysis focusing on opportunities and potential"
+  },
+  "skeptic": {
+    "title": "The Skeptic",
+    "icon": "shield",
+    "perspective": "2-3 sentence risk and challenge analysis"
+  },
+  "strategist": {
+    "title": "The Strategist",
+    "icon": "target",
+    "perspective": "2-3 sentence strategic path forward with sequencing"
+  },
+  "community": {
+    "title": "Community Voice",
+    "icon": "users",
+    "perspective": "2-3 sentence stakeholder impact analysis"
+  },
+  "synthesis": "3-4 sentence balanced recommendation integrating all four perspectives with a clear action step"
+}
+
+CRITICAL: Return ONLY the JSON object. No markdown, no code fences, no text before or after."""
+
+    try:
+        chat = LlmChat(
+            api_key=API_KEY,
+            session_id=f"council-{int(time.time())}-{hash(req.question) % 10000}",
+            system_message=system_message
+        ).with_model(MODEL_PROVIDER, MODEL_NAME)
+        
+        response = await chat.send_message(UserMessage(text=req.question))
+        data = parse_json_response(response)
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Council encountered an issue: {str(e)}")
+
+# ─── Bicameral Pipeline ─────────────────────────────────────────────
+
+@app.post("/api/ai/bicameral/verify")
+async def bicameral_verify(req: BicameralRequest, request: Request):
+    check_rate_limit(request.client.host)
+    if not req.draft or len(req.draft.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Draft must be at least 10 characters")
+    
+    system_message = """You are STDIO — the Verification Layer of the ORSON Bicameral Pipeline for Jack Stallion Enterprise.
+
+Your job: rigorously evaluate content against quality standards. You are ruthlessly honest.
+
+Scoring rubric:
+- 10/10: Indistinguishable from best manually written content
+- 7/10: Publishable with minor adjustments
+- 4/10: Requires significant rewriting
+- 1/10: Fundamentally flawed
+
+You MUST respond with ONLY valid JSON (no markdown, no code fences, no extra text):
+{
+  "score": <integer 1-10>,
+  "pass": <boolean, true if score >= 7>,
+  "strengths": ["strength 1", "strength 2"],
+  "violations": ["violation 1", "violation 2"],
+  "fixes": ["specific fix 1", "specific fix 2"],
+  "summary": "2-3 sentence overall assessment"
+}
+
+CRITICAL: Return ONLY the JSON object."""
+
+    try:
+        chat = LlmChat(
+            api_key=API_KEY,
+            session_id=f"bicameral-{int(time.time())}-{hash(req.draft) % 10000}",
+            system_message=system_message
+        ).with_model(MODEL_PROVIDER, MODEL_NAME)
+        
+        prompt = f"Evaluate this draft for {req.context}:\n\n{req.draft}"
+        response = await chat.send_message(UserMessage(text=prompt))
+        data = parse_json_response(response)
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Verification encountered an issue: {str(e)}")
+
+# ─── Progress Tracking ───────────────────────────────────────────────
+
+@app.post("/api/progress")
+async def save_progress(update: ProgressUpdate):
+    """Save exercise progress (anonymous for now, will add auth later)."""
+    doc = {
+        "exercise_id": update.exercise_id,
+        "score": update.score,
+        "completed": update.completed,
+        "data": update.data or {},
+        "timestamp": time.time()
+    }
+    await db.progress.update_one(
+        {"exercise_id": update.exercise_id},
+        {"$set": doc},
+        upsert=True
+    )
+    return {"success": True}
+
+@app.get("/api/progress")
+async def get_progress():
+    """Get all progress entries."""
+    cursor = db.progress.find({}, {"_id": 0})
+    progress = await cursor.to_list(length=100)
+    return {"progress": progress}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)

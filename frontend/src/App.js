@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AppShell from './components/AppShell';
 import Dashboard from './components/Dashboard';
 import PaywallGate from './components/PaywallGate';
@@ -75,36 +76,73 @@ const exerciseComponents = {
 function AppContent() {
   const [searchParams] = useSearchParams();
   const isAdmin = searchParams.get('admin') === 'true';
+  const { user, isAuthenticated, getAuthHeaders } = useAuth();
   const [unlockedTiers, setUnlockedTiers] = useState([0]);
-  const [currentExercise, setCurrentExercise] = useState(null);
   const [scores, setScores] = useState({});
   const [completedExercises, setCompletedExercises] = useState([]);
   const navigate = useNavigate();
-  const location = useLocation();
+  const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
+  // Admin mode unlocks all tiers
   useEffect(() => {
     if (isAdmin) {
       setUnlockedTiers([0, 1, 2, 3, 4]);
+    } else if (user?.unlocked_tiers) {
+      setUnlockedTiers(user.unlocked_tiers);
+    } else {
+      setUnlockedTiers([0]);
     }
-  }, [isAdmin]);
+  }, [isAdmin, user]);
 
-  const isExerciseUnlocked = useCallback((exerciseId) => {
-    const tierId = getExerciseTier(exerciseId);
-    return unlockedTiers.includes(tierId);
-  }, [unlockedTiers]);
+  // Load saved progress from backend
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/progress`, {
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        if (data.progress) {
+          const savedScores = {};
+          const savedCompleted = [];
+          data.progress.forEach(p => {
+            if (p.score) savedScores[p.exercise_id] = p.score;
+            if (p.completed) savedCompleted.push(p.exercise_id);
+          });
+          setScores(prev => ({ ...prev, ...savedScores }));
+          setCompletedExercises(prev => [...new Set([...prev, ...savedCompleted])]);
+        }
+      } catch (e) {
+        console.error('Failed to load progress:', e);
+      }
+    };
+    loadProgress();
+  }, [isAuthenticated, getAuthHeaders, API_BASE]);
 
   const updateScore = useCallback((exerciseId, score) => {
     setScores(prev => {
       const best = prev[exerciseId] || 0;
       return { ...prev, [exerciseId]: Math.max(best, score) };
     });
-  }, []);
+    // Save to backend
+    fetch(`${API_BASE}/api/progress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ exercise_id: exerciseId, score, completed: false }),
+    }).catch(console.error);
+  }, [getAuthHeaders, API_BASE]);
 
   const markComplete = useCallback((exerciseId) => {
     setCompletedExercises(prev =>
       prev.includes(exerciseId) ? prev : [...prev, exerciseId]
     );
-  }, []);
+    // Save to backend
+    fetch(`${API_BASE}/api/progress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ exercise_id: exerciseId, completed: true }),
+    }).catch(console.error);
+  }, [getAuthHeaders, API_BASE]);
 
   const navigateToExercise = useCallback((exerciseId) => {
     const adminParam = isAdmin ? '?admin=true' : '';
@@ -153,6 +191,20 @@ function AppContent() {
 function ExerciseRouter({ unlockedTiers, isAdmin, scores, completedExercises, updateScore, markComplete }) {
   const { exerciseId } = require('react-router-dom').useParams();
   const tierId = getExerciseTier(exerciseId);
+
+  // Handle invalid exercise IDs
+  if (tierId === -1) {
+    return (
+      <div className="max-w-md mx-auto py-16 text-center" data-testid="exercise-not-found">
+        <div className="text-4xl mb-4" style={{ color: 'var(--jse-gold)' }}>&#x2726;</div>
+        <h2 className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)' }}>Exercise Not Found</h2>
+        <p className="text-sm mb-6" style={{ color: 'var(--jse-muted)' }}>
+          The exercise "{exerciseId}" doesn't exist. Head back to the dashboard to explore available exercises.
+        </p>
+      </div>
+    );
+  }
+
   const isUnlocked = unlockedTiers.includes(tierId);
 
   if (!isUnlocked) {
@@ -162,7 +214,13 @@ function ExerciseRouter({ unlockedTiers, isAdmin, scores, completedExercises, up
 
   const Component = exerciseComponents[exerciseId];
   if (!Component) {
-    return <div className="p-8 text-center" style={{ color: 'var(--jse-muted)' }}>Exercise not found</div>;
+    return (
+      <div className="max-w-md mx-auto py-16 text-center" data-testid="exercise-not-found">
+        <div className="text-4xl mb-4" style={{ color: 'var(--jse-gold)' }}>&#x2726;</div>
+        <h2 className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)' }}>Exercise Not Found</h2>
+        <p className="text-sm" style={{ color: 'var(--jse-muted)' }}>This exercise is not available yet.</p>
+      </div>
+    );
   }
 
   return (
@@ -178,9 +236,11 @@ function ExerciseRouter({ unlockedTiers, isAdmin, scores, completedExercises, up
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="noise-overlay min-h-screen" style={{ background: 'var(--jse-bg)' }}>
-        <AppContent />
-      </div>
+      <AuthProvider>
+        <div className="noise-overlay min-h-screen" style={{ background: 'var(--jse-bg)' }}>
+          <AppContent />
+        </div>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

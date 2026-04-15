@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, CheckCircle2, Menu, X, Sparkles, LayoutDashboard } from 'lucide-react';
+import { Lock, CheckCircle2, Menu, X, Sparkles, LayoutDashboard, LogIn, LogOut, User } from 'lucide-react';
 import { TIERS } from '../data/tierConfig';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AppShell({ children, unlockedTiers, isAdmin, completedExercises, scores, onNavigate, onDashboard }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,6 +61,7 @@ export default function AppShell({ children, unlockedTiers, isAdmin, completedEx
 
 function SidebarContent({ unlockedTiers, isAdmin, completedExercises, onNavigate, onDashboard }) {
   const [expandedTier, setExpandedTier] = useState(0);
+  const { user, isAuthenticated, signInWithGoogle, signOut } = useAuth();
 
   return (
     <div className="flex flex-col h-full">
@@ -154,9 +156,35 @@ function SidebarContent({ unlockedTiers, isAdmin, completedExercises, onNavigate
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Footer - User Auth */}
       <div className="p-4 border-t border-white/5">
-        <div className="mono-label text-center" style={{ color: 'var(--jse-muted)', fontSize: '0.55rem' }}>
+        {isAuthenticated ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              {user?.picture ? (
+                <img src={user.picture} alt="" className="w-7 h-7 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'var(--jse-teal-deep)' }}>
+                  <User size={14} style={{ color: 'var(--jse-teal)' }} />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="text-xs truncate" style={{ color: 'var(--jse-text)' }}>{user?.name}</div>
+                <div className="mono-label truncate" style={{ color: 'var(--jse-muted)', fontSize: '0.5rem' }}>{user?.email}</div>
+              </div>
+            </div>
+            <button onClick={signOut} className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors" data-testid="sign-out-button">
+              <LogOut size={12} style={{ color: 'var(--jse-muted)' }} />
+              <span className="mono-label" style={{ color: 'var(--jse-muted)', fontSize: '0.55rem' }}>SIGN OUT</span>
+            </button>
+          </div>
+        ) : (
+          <button onClick={signInWithGoogle} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl transition-colors hover:bg-white/5" style={{ border: '1px solid rgba(255,255,255,0.1)' }} data-testid="google-sign-in-button">
+            <LogIn size={14} style={{ color: 'var(--jse-teal)' }} />
+            <span className="mono-label" style={{ color: 'var(--jse-teal)', fontSize: '0.6rem' }}>SIGN IN WITH GOOGLE</span>
+          </button>
+        )}
+        <div className="mono-label text-center mt-2" style={{ color: 'var(--jse-muted)', fontSize: '0.55rem' }}>
           jackstallionenterprise.com
         </div>
       </div>

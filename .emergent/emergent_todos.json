@@ -1,47 +1,31 @@
 [
   {
-    "content": "Phase 1: POC - Get integration playbooks (Claude API + Google OAuth)",
+    "content": "Phase 1: POC - All steps",
     "status": "completed"
   },
   {
-    "content": "Phase 1: POC - Get Emergent Universal LLM Key",
+    "content": "Phase 2: Full app build + testing",
     "status": "completed"
   },
   {
-    "content": "Phase 1: POC - Write & test Python POC script (Council of Experts + Bicameral Pipeline)",
+    "content": "Phase 3: Google OAuth - Backend auth endpoints (test-login, /auth/me, JWT)",
     "status": "completed"
   },
   {
-    "content": "Phase 1: POC - Fix until both endpoints work reliably",
+    "content": "Phase 3: Google OAuth - Frontend Google Sign-In + auth context",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Design Agent - Get design guidelines",
+    "content": "Phase 3: MongoDB user persistence - progress, scores, completed exercises",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Backend Implementation (FastAPI + MongoDB + Claude API endpoints)",
+    "content": "Phase 3: Test bypass for testing (email/password)",
     "status": "completed"
-  },
-  {
-    "content": "Phase 2: Frontend Implementation (All tiers, exercises, paywall, Brand Bible UI)",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: All user stories covered in Development and Testing",
-    "status": "in_progress"
-  },
-  {
-    "content": "Phase 2: End to End Testing using Testing Agent",
-    "status": "pending"
-  },
-  {
-    "content": "Phase 3: Google OAuth + MongoDB user persistence",
-    "status": "pending"
   },
   {
     "content": "Phase 3: End to End Testing using Testing Agent",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 4: Polish, hardening, content completeness",

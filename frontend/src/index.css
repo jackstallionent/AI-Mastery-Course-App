@@ -170,6 +170,28 @@
   opacity: 0.06;
 }
 
+/* Override Emergent badge to just E logo */
+#emergent-badge {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 8px !important;
+  border-radius: 50% !important;
+  justify-content: center !important;
+  opacity: 0.5 !important;
+  transition: opacity 0.2s !important;
+  overflow: hidden !important;
+}
+#emergent-badge:hover {
+  opacity: 0.85 !important;
+}
+#emergent-badge p,
+#emergent-badge span {
+  display: none !important;
+}
+#emergent-badge svg {
+  flex-shrink: 0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .teal-pulse, .gold-shimmer { animation: none; }
   .card-reveal { animation: none; opacity: 1; transform: none; }

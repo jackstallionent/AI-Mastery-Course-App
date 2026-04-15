@@ -75,7 +75,7 @@ const exerciseComponents = {
 
 function AppContent() {
   const [searchParams] = useSearchParams();
-  const isAdmin = searchParams.get('admin') === 'true';
+  const isAdmin = searchParams.get('jackstallion') === 'true';
   const { user, isAuthenticated, getAuthHeaders } = useAuth();
   const [unlockedTiers, setUnlockedTiers] = useState([0]);
   const [scores, setScores] = useState({});
@@ -145,12 +145,12 @@ function AppContent() {
   }, [getAuthHeaders, API_BASE]);
 
   const navigateToExercise = useCallback((exerciseId) => {
-    const adminParam = isAdmin ? '?admin=true' : '';
+    const adminParam = isAdmin ? '?jackstallion=true' : '';
     navigate(`/exercise/${exerciseId}${adminParam}`);
   }, [navigate, isAdmin]);
 
   const navigateToDashboard = useCallback(() => {
-    const adminParam = isAdmin ? '?admin=true' : '';
+    const adminParam = isAdmin ? '?jackstallion=true' : '';
     navigate(`/${adminParam}`);
   }, [navigate, isAdmin]);
 

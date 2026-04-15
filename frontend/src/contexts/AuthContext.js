@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       saveToken(urlToken);
       // Remove token from URL without reload
       const newUrl = window.location.pathname + 
-        (params.get('admin') === 'true' ? '?admin=true' : '');
+        (params.get('jackstallion') === 'true' ? '?jackstallion=true' : '');
       window.history.replaceState({}, '', newUrl || '/');
     }
     const authError = params.get('auth_error');
